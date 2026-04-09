@@ -18,6 +18,25 @@ export const metadata: Metadata = {
   title: "Om Gorakhia — I turn messy data into systems that decide.",
   description:
     "Business Analyst, Data Scientist, and ML Engineer building autonomous AI systems. Currently pursuing MSBA at NUS Singapore.",
+  metadataBase: new URL("https://om-gorakhia-portfolio.vercel.app"),
+  openGraph: {
+    title: "Om Gorakhia — I turn messy data into systems that decide.",
+    description:
+      "Business Analyst, Data Scientist, and ML Engineer. NUS MSBA. Building algo trading systems, agentic AI, and data pipelines that deliver $2M+ in client insights.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Om Gorakhia",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Om Gorakhia — I turn messy data into systems that decide.",
+    description:
+      "Business Analyst, Data Scientist, and ML Engineer. NUS MSBA. Building autonomous AI systems.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
