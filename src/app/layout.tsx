@@ -16,23 +16,23 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Om Gorakhia — I turn messy data into systems that decide.",
+  title: "om.sys — Operator Console",
   description:
-    "Business Analyst, Data Scientist, and ML Engineer building autonomous AI systems. Currently pursuing MSBA at NUS Singapore.",
+    "Om Gorakhia — I turn messy data into systems that decide. Algo trading, agentic AI, quantitative modeling. NUS MSBA.",
   metadataBase: new URL("https://portfolio-build-kohl.vercel.app"),
   openGraph: {
-    title: "Om Gorakhia — I turn messy data into systems that decide.",
+    title: "om.sys — Operator Console",
     description:
-      "Business Analyst, Data Scientist, and ML Engineer. NUS MSBA. Building algo trading systems, agentic AI, and data pipelines that deliver $2M+ in client insights.",
+      "Om Gorakhia — I turn messy data into systems that decide. Algo trading, agentic AI, quantitative modeling, and data pipelines that deliver $2M+ in client insights.",
     type: "website",
     locale: "en_US",
-    siteName: "Om Gorakhia",
+    siteName: "om.sys",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Om Gorakhia — I turn messy data into systems that decide.",
+    title: "om.sys — Operator Console",
     description:
-      "Business Analyst, Data Scientist, and ML Engineer. NUS MSBA. Building autonomous AI systems.",
+      "Om Gorakhia — I turn messy data into systems that decide. NUS MSBA. Algo trading, agentic AI, quantitative modeling.",
   },
   robots: {
     index: true,

@@ -4,12 +4,12 @@ import type { Repo } from "./types";
 const GITHUB_USERNAME = "om-gorakhia";
 const SELECTED_REPO_NAMES = [
   "nse-algo-trading-system",
-  "sports-bet-portfolio",
+  "Banking-AI-advisor",
   "synpulse",
+  "sports-bet-portfolio",
+  "Ecommerce_Warehouse_Optimization",
   "loan-default-prediction",
   "econometric-modeling-demand-analysis",
-  "Banking-AI-advisor",
-  "Ecommerce_Warehouse_Optimization",
 ];
 
 const octokit = new Octokit();

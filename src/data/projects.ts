@@ -179,7 +179,15 @@ export const projectDetails: Record<string, ProjectDetail> = {
   },
 };
 
-export const projectSlugs = Object.keys(projectDetails);
+export const projectSlugs = [
+  "nse-algo-trading-system",
+  "Banking-AI-advisor",
+  "synpulse",
+  "sports-bet-portfolio",
+  "Ecommerce_Warehouse_Optimization",
+  "loan-default-prediction",
+  "econometric-modeling-demand-analysis",
+];
 
 export function getProjectFromRepo(repo: Repo): ProjectDetail | null {
   return projectDetails[repo.name] ?? null;

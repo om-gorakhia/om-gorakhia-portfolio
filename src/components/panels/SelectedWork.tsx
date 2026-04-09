@@ -41,7 +41,7 @@ function RepoCard({ repo, index }: { repo: Repo; index: number }) {
 
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-3">
-              <h3 className="font-mono text-base font-semibold text-foreground group-hover:text-accent-light transition-colors">
+              <h3 className="font-mono text-sm font-semibold text-foreground group-hover:text-accent-light transition-colors break-all leading-snug">
                 {repo.name}
               </h3>
               <svg
