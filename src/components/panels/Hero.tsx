@@ -13,9 +13,10 @@ const Scene = dynamic(
 interface HeroProps {
   onAvatarClick: () => void;
   transmissionProgress: number;
+  transmissionActive: boolean;
 }
 
-export function Hero({ onAvatarClick, transmissionProgress }: HeroProps) {
+export function Hero({ onAvatarClick, transmissionProgress, transmissionActive }: HeroProps) {
   return (
     <section
       id="hero"
@@ -30,10 +31,22 @@ export function Hero({ onAvatarClick, transmissionProgress }: HeroProps) {
       </div>
 
       {/* Dark vignette behind text for contrast */}
-      <div className="absolute inset-0 z-[5] pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_55%,rgba(5,6,10,0.75)_0%,transparent_100%)]" />
+      <motion.div
+        className="absolute inset-0 z-[5] pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_55%,rgba(5,6,10,0.75)_0%,transparent_100%)]"
+        animate={{ opacity: transmissionActive ? 0 : 1 }}
+        transition={{ duration: 0.6 }}
+      />
 
-      {/* Hero overlay content */}
-      <div className="relative z-10 flex flex-col items-center text-center pointer-events-none px-6">
+      {/* Hero overlay content — folds away during transmission */}
+      <motion.div
+        className="relative z-10 flex flex-col items-center text-center pointer-events-none px-6"
+        animate={{
+          opacity: transmissionActive ? 0 : 1,
+          y: transmissionActive ? -60 : 0,
+          scale: transmissionActive ? 0.95 : 1,
+        }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -93,7 +106,7 @@ export function Hero({ onAvatarClick, transmissionProgress }: HeroProps) {
             <path d="M12 5v14M19 12l-7 7-7-7" />
           </svg>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

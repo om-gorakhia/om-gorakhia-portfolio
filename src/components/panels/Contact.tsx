@@ -348,10 +348,10 @@ export function Contact() {
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
             </div>
-            <span className="font-mono text-[10px] text-foreground/50 ml-2">
+            <span className="font-mono text-[10px] text-foreground/60 ml-2">
               om@portfolio — contact
             </span>
-            <span className="font-mono text-[10px] text-foreground/30 ml-auto">
+            <span className="font-mono text-[10px] text-foreground/60 ml-auto">
               {COMMANDS.length} commands available
             </span>
           </div>
@@ -386,7 +386,7 @@ export function Contact() {
 
             {/* Input line */}
             <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2 relative">
-              <span className="text-accent-light/70 shrink-0">om@portfolio:~$</span>
+              <span className="text-accent-light/85 shrink-0">om@portfolio:~$</span>
               <div className="relative flex-1">
                 <input
                   ref={inputRef}
@@ -419,7 +419,7 @@ export function Contact() {
           transition={{ delay: 0.5 }}
         >
           {["Tab: autocomplete", "↑↓: history", "help: commands"].map((hint) => (
-            <span key={hint} className="font-mono text-[10px] text-foreground/30">
+            <span key={hint} className="font-mono text-[10px] text-foreground/60">
               {hint}
             </span>
           ))}

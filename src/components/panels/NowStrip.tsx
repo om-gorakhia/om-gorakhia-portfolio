@@ -45,7 +45,7 @@ export function NowStrip({ commit }: NowStripProps) {
 
         <div className="font-mono text-sm text-foreground/80 flex items-center gap-3 overflow-hidden">
           <span className="text-accent-light shrink-0">{commit.repo}</span>
-          <span className="text-foreground/40 hidden sm:inline">→</span>
+          <span className="text-foreground/55 hidden sm:inline">→</span>
           <span className="truncate text-foreground/60 hidden sm:inline">
             &quot;{commit.message}&quot;
           </span>
@@ -55,7 +55,7 @@ export function NowStrip({ commit }: NowStripProps) {
           <span className="font-mono text-xs px-2 py-0.5 rounded bg-accent/10 text-accent-light border border-accent/20">
             {commit.language}
           </span>
-          <span className="font-mono text-xs text-foreground/40">
+          <span className="font-mono text-xs text-foreground/55">
             {timeAgo(commit.date)}
           </span>
         </div>

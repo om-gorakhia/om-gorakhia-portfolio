@@ -35,13 +35,13 @@ function TimelineCard({
 
       {/* Card */}
       <div className="rounded-xl border border-surface-border bg-surface/60 backdrop-blur-sm p-5 hover:border-accent/20 transition-colors">
-        <span className="font-mono text-xs text-accent-light/70 block mb-2">
+        <span className="font-mono text-xs text-accent-light/85 block mb-2">
           {entry.date}
         </span>
         <h3 className="font-mono text-sm font-semibold text-foreground mb-1">
           {entry.title}
         </h3>
-        <p className="text-xs text-foreground/50 leading-relaxed">
+        <p className="text-xs text-foreground/60 leading-relaxed">
           {entry.description}
         </p>
       </div>
