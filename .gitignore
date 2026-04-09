@@ -22,3 +22,5 @@ selfie_*.png
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
