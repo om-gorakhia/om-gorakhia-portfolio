@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { MonoLabel } from "@/components/ui/MonoLabel";
-import { selectedRepos } from "@/data/github";
 import type { Repo } from "@/lib/types";
 
 function timeAgo(dateString: string): string {
@@ -87,7 +86,7 @@ function RepoCard({ repo, index }: { repo: Repo; index: number }) {
   );
 }
 
-export function SelectedWork() {
+export function SelectedWork({ repos }: { repos: Repo[] }) {
   return (
     <section id="work" className="relative py-24 px-6">
       <div className="max-w-5xl mx-auto">
@@ -105,7 +104,7 @@ export function SelectedWork() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {selectedRepos.map((repo, i) => (
+          {repos.map((repo, i) => (
             <RepoCard key={repo.name} repo={repo} index={i} />
           ))}
         </div>
