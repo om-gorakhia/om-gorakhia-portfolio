@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { JetBrains_Mono } from "next/font/google";
+import { PageTransition } from "@/components/PageTransition";
 import "./globals.css";
 
 const geist = Geist({
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   title: "Om Gorakhia — I turn messy data into systems that decide.",
   description:
     "Business Analyst, Data Scientist, and ML Engineer building autonomous AI systems. Currently pursuing MSBA at NUS Singapore.",
-  metadataBase: new URL("https://om-gorakhia-portfolio.vercel.app"),
+  metadataBase: new URL("https://portfolio-build-kohl.vercel.app"),
   openGraph: {
     title: "Om Gorakhia — I turn messy data into systems that decide.",
     description:
@@ -50,7 +51,7 @@ export default function RootLayout({
       className={`${geist.variable} ${jetbrainsMono.variable} dark`}
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
   );
