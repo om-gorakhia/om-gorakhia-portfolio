@@ -56,7 +56,7 @@ export function ProjectLayout({
           className="group flex items-center gap-2 rounded-xl border border-surface-border bg-surface/80 backdrop-blur-md px-3 py-2 hover:border-accent/30 transition-colors"
         >
           <svg
-            className="w-4 h-4 text-foreground/40 group-hover:text-accent-light transition-colors"
+            className="w-4 h-4 text-foreground/55 group-hover:text-accent-light transition-colors"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -64,7 +64,7 @@ export function ProjectLayout({
           >
             <path d="M15 19l-7-7 7-7" />
           </svg>
-          <span className="font-mono text-xs text-foreground/50 group-hover:text-accent-light transition-colors">
+          <span className="font-mono text-xs text-foreground/60 group-hover:text-accent-light transition-colors">
             {project.title}
           </span>
         </Link>
@@ -94,7 +94,7 @@ export function ProjectLayout({
               {project.language}
             </span>
             {stars > 0 && (
-              <span className="flex items-center gap-1 text-xs text-foreground/40 font-mono">
+              <span className="flex items-center gap-1 text-xs text-foreground/55 font-mono">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="currentColor"
@@ -105,7 +105,7 @@ export function ProjectLayout({
                 {stars}
               </span>
             )}
-            <span className="text-xs text-foreground/50 font-mono">
+            <span className="text-xs text-foreground/60 font-mono">
               pushed {timeAgo(pushedAt)}
             </span>
             <div className="flex gap-2 ml-auto">
@@ -134,21 +134,21 @@ export function ProjectLayout({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <span className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/50">
+          <span className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/60">
             {project.domain}
           </span>
           {project.techniques.map((t) => (
             <span
               key={t}
-              className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/50"
+              className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/60"
             >
               {t}
             </span>
           ))}
-          <span className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/50">
+          <span className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/60">
             {project.datasetScale}
           </span>
-          <span className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/50">
+          <span className="font-mono text-[11px] px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/60">
             {project.role}
           </span>
         </motion.div>
@@ -186,7 +186,7 @@ export function ProjectLayout({
                 <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
                 <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
               </div>
-              <span className="font-mono text-[10px] text-foreground/50 ml-2">
+              <span className="font-mono text-[10px] text-foreground/60 ml-2">
                 {project.slug} — interactive demo
               </span>
             </div>
@@ -215,7 +215,7 @@ export function ProjectLayout({
           <ul className="space-y-3 max-w-3xl">
             {project.architectureNotes.map((note, i) => (
               <li key={i} className="flex gap-3 text-foreground/60 text-sm leading-relaxed">
-                <span className="text-accent-light/50 shrink-0 font-mono">▸</span>
+                <span className="text-accent-light/70 shrink-0 font-mono">▸</span>
                 {note}
               </li>
             ))}
@@ -232,7 +232,7 @@ export function ProjectLayout({
           {prev ? (
             <Link
               href={`/work/${prev}`}
-              className="group flex items-center gap-2 font-mono text-sm text-foreground/40 hover:text-accent-light transition-colors"
+              className="group flex items-center gap-2 font-mono text-sm text-foreground/55 hover:text-accent-light transition-colors"
             >
               <span className="group-hover:-translate-x-1 transition-transform">←</span>
               {prev.replace(/-/g, " ")}
@@ -243,7 +243,7 @@ export function ProjectLayout({
           {next ? (
             <Link
               href={`/work/${next}`}
-              className="group flex items-center gap-2 font-mono text-sm text-foreground/40 hover:text-accent-light transition-colors"
+              className="group flex items-center gap-2 font-mono text-sm text-foreground/55 hover:text-accent-light transition-colors"
             >
               {next.replace(/-/g, " ")}
               <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -256,10 +256,10 @@ export function ProjectLayout({
 
       <footer className="border-t border-surface-border py-8 px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <span className="font-mono text-xs text-foreground/50">
+          <span className="font-mono text-xs text-foreground/60">
             © {new Date().getFullYear()} Om Gorakhia
           </span>
-          <span className="font-mono text-xs text-foreground/40">
+          <span className="font-mono text-xs text-foreground/55">
             sys.uptime: ∞
           </span>
         </div>
