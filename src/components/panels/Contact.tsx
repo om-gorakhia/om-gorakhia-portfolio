@@ -141,7 +141,7 @@ export function Contact() {
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
             </div>
-            <span className="font-mono text-[10px] text-foreground/30 ml-2">
+            <span className="font-mono text-[10px] text-foreground/50 ml-2">
               om@portfolio — contact
             </span>
           </div>
@@ -162,7 +162,7 @@ export function Contact() {
                     line.type === "input"
                       ? "text-accent-light"
                       : line.type === "system"
-                        ? "text-accent/60"
+                        ? "text-accent-light/80"
                         : "text-foreground/60"
                   }`}
                 >

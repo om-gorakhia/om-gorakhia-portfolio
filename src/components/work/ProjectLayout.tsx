@@ -105,7 +105,7 @@ export function ProjectLayout({
                 {stars}
               </span>
             )}
-            <span className="text-xs text-foreground/30 font-mono">
+            <span className="text-xs text-foreground/50 font-mono">
               pushed {timeAgo(pushedAt)}
             </span>
             <div className="flex gap-2 ml-auto">
@@ -186,7 +186,7 @@ export function ProjectLayout({
                 <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
                 <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
               </div>
-              <span className="font-mono text-[10px] text-foreground/30 ml-2">
+              <span className="font-mono text-[10px] text-foreground/50 ml-2">
                 {project.slug} — interactive demo
               </span>
             </div>
@@ -256,10 +256,10 @@ export function ProjectLayout({
 
       <footer className="border-t border-surface-border py-8 px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <span className="font-mono text-xs text-foreground/30">
+          <span className="font-mono text-xs text-foreground/50">
             © {new Date().getFullYear()} Om Gorakhia
           </span>
-          <span className="font-mono text-xs text-foreground/20">
+          <span className="font-mono text-xs text-foreground/40">
             sys.uptime: ∞
           </span>
         </div>

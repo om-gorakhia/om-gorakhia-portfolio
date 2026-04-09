@@ -82,10 +82,10 @@ export function PageClient({ repos, commit }: PageClientProps) {
 
       <footer className="border-t border-surface-border py-8 px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <span className="font-mono text-xs text-foreground/30">
+          <span className="font-mono text-xs text-foreground/50">
             © {new Date().getFullYear()} Om Gorakhia
           </span>
-          <span className="font-mono text-xs text-foreground/20">
+          <span className="font-mono text-xs text-foreground/40">
             sys.uptime: ∞
           </span>
         </div>

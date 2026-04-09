@@ -71,8 +71,14 @@ function RepoCard({ repo, index }: { repo: Repo; index: number }) {
                   {repo.stars}
                 </span>
               )}
-              <span className="text-xs text-foreground/30 ml-auto font-mono">
+              <span className="text-xs text-foreground/50 ml-auto font-mono">
                 {timeAgo(repo.pushedAt)}
+              </span>
+            </div>
+            {/* Hover affordance */}
+            <div className="mt-3 pt-3 border-t border-surface-border opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="font-mono text-[10px] text-accent-light/80 tracking-wider uppercase">
+                run simulation →
               </span>
             </div>
           </div>
@@ -84,6 +90,7 @@ function RepoCard({ repo, index }: { repo: Repo; index: number }) {
         href={repo.url}
         target="_blank"
         rel="noopener noreferrer"
+        aria-label={`View ${repo.name} on GitHub`}
         className="absolute top-3 right-3 z-20 p-1.5 rounded-lg bg-surface/80 border border-surface-border opacity-0 group-hover:opacity-100 transition-opacity hover:border-accent/30"
         onClick={(e) => e.stopPropagation()}
       >
@@ -106,10 +113,13 @@ export function SelectedWork({ repos }: { repos: Repo[] }) {
           transition={{ duration: 0.5 }}
           className="mb-12"
         >
-          <MonoLabel className="mb-3 block">ls ~/projects --sort=signal</MonoLabel>
+          <MonoLabel className="mb-3 block">ls ~/projects --interactive</MonoLabel>
           <h2 className="font-mono text-3xl md:text-4xl font-bold">
             Selected Work
           </h2>
+          <p className="text-sm text-foreground/50 mt-2 font-mono">
+            Each project has a live, interactive simulation you can play with.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
