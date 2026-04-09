@@ -8,6 +8,8 @@ import { KellyHedgeLab } from "@/components/work/sims/KellyHedgeLab";
 import { AgentTheater } from "@/components/work/sims/AgentTheater";
 import { RiskScorer } from "@/components/work/sims/RiskScorer";
 import { PricingLab } from "@/components/work/sims/PricingLab";
+import { AdvisorConsole } from "@/components/work/sims/AdvisorConsole";
+import { WarehouseOptimizer } from "@/components/work/sims/WarehouseOptimizer";
 
 export function generateStaticParams() {
   return projectSlugs.map((slug) => ({ slug }));
@@ -45,6 +47,8 @@ const simulations: Record<string, React.ComponentType> = {
   synpulse: AgentTheater,
   "loan-default-prediction": RiskScorer,
   "econometric-modeling-demand-analysis": PricingLab,
+  "banking-ai-advisor": AdvisorConsole,
+  "Ecommerce_Warehouse_Optimization": WarehouseOptimizer,
 };
 
 export default async function WorkDetailPage({

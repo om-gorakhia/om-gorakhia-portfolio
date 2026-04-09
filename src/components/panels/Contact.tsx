@@ -1,23 +1,91 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MonoLabel } from "@/components/ui/MonoLabel";
 import { resume } from "@/data/resume";
+import { projectSlugs } from "@/data/projects";
 
 interface TerminalLine {
-  type: "input" | "output" | "system";
+  type: "input" | "output" | "system" | "error";
   text: string;
+}
+
+const COMMANDS = [
+  "help",
+  "whois",
+  "links",
+  "projects",
+  "open",
+  "clear",
+  "contact",
+  "send",
+  "skills",
+  "hello",
+] as const;
+
+const OPEN_TARGETS = ["github", "linkedin", "email", ...projectSlugs];
+
+function buildHelp(): string {
+  return [
+    "Available commands:",
+    "",
+    "  help       Show this help message",
+    "  whois      Display profile summary",
+    "  links      Show contact & social links",
+    "  skills     List technical skills",
+    "  projects   List portfolio projects",
+    "  open <t>   Open a link (github | linkedin | email | <project>)",
+    "  contact    Show contact information",
+    "  send <msg> Open email with message",
+    "  clear      Clear terminal",
+    "  hello      Say hi",
+  ].join("\n");
+}
+
+function buildWhois(): string {
+  return [
+    `Name:      ${resume.fullName}`,
+    `Email:     ${resume.email}`,
+    `Role:      ${resume.experience[0]?.title ?? "—"}`,
+    `Company:   ${resume.experience[0]?.company ?? "—"}`,
+    `Education: ${resume.education[0]?.degree}`,
+    `           ${resume.education[0]?.institution}`,
+    `Tagline:   "${resume.tagline}"`,
+  ].join("\n");
+}
+
+function buildLinks(): string {
+  return [
+    `GitHub:   ${resume.github}`,
+    `LinkedIn: ${resume.linkedin}`,
+    `Email:    ${resume.email}`,
+  ].join("\n");
+}
+
+function buildSkills(): string {
+  return Object.entries(resume.skills)
+    .map(([category, items]) => `  ${category}: ${(items as string[]).join(", ")}`)
+    .join("\n");
+}
+
+function buildProjects(): string {
+  return projectSlugs
+    .map((slug, i) => `  ${i + 1}. ${slug}`)
+    .join("\n");
 }
 
 export function Contact() {
   const [lines, setLines] = useState<TerminalLine[]>([
     { type: "system", text: "om@portfolio:~$ contact --init" },
-    { type: "output", text: "Contact system online. Type your message and press Enter." },
-    { type: "output", text: 'Type "help" for available commands.' },
+    { type: "output", text: 'Contact system online. Type "help" for available commands.' },
   ]);
   const [input, setInput] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIdx, setHistoryIdx] = useState(-1);
+  const [suggestion, setSuggestion] = useState("");
   const terminalRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (terminalRef.current) {
@@ -25,58 +93,197 @@ export function Contact() {
     }
   }, [lines]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  // Tab autocomplete
+  const handleTabComplete = useCallback(() => {
+    const trimmed = input.trim().toLowerCase();
+    if (!trimmed) return;
 
-    const newLines: TerminalLine[] = [
-      { type: "input", text: `om@portfolio:~$ ${input}` },
-    ];
+    const parts = trimmed.split(/\s+/);
 
-    const cmd = input.trim().toLowerCase();
-
-    if (cmd === "help") {
-      newLines.push({
-        type: "output",
-        text: `Available commands:
-  email    → Open email client
-  github   → Open GitHub profile
-  linkedin → Open LinkedIn profile
-  clear    → Clear terminal
-  hello    → Say hi`,
-      });
-    } else if (cmd === "email") {
-      newLines.push({ type: "system", text: `Opening mailto:${resume.email}...` });
-      window.open(`mailto:${resume.email}`, "_blank");
-    } else if (cmd === "github") {
-      newLines.push({ type: "system", text: `Navigating to ${resume.github}...` });
-      window.open(resume.github, "_blank");
-    } else if (cmd === "linkedin") {
-      newLines.push({ type: "system", text: `Navigating to ${resume.linkedin}...` });
-      window.open(resume.linkedin, "_blank");
-    } else if (cmd === "clear") {
-      setLines([{ type: "system", text: "om@portfolio:~$ Terminal cleared." }]);
-      setInput("");
-      return;
-    } else if (cmd === "hello" || cmd === "hi" || cmd === "hey") {
-      newLines.push({
-        type: "output",
-        text: `Hey! 👋 I'm Om. Thanks for visiting. Send me a message at ${resume.email} — I'd love to chat.`,
-      });
-    } else {
-      // Treat everything else as a message → mailto
-      newLines.push({
-        type: "system",
-        text: "Message received. Opening email client with your message...",
-      });
-      const subject = encodeURIComponent("Hey Om — from your portfolio");
-      const body = encodeURIComponent(input);
-      window.open(`mailto:${resume.email}?subject=${subject}&body=${body}`, "_blank");
+    if (parts.length === 1) {
+      // Complete command name
+      const matches = COMMANDS.filter((c) => c.startsWith(parts[0]));
+      if (matches.length === 1) {
+        setInput(matches[0] + " ");
+        setSuggestion("");
+      }
+    } else if (parts[0] === "open" && parts.length === 2) {
+      // Complete open target
+      const matches = OPEN_TARGETS.filter((t) => t.startsWith(parts[1]));
+      if (matches.length === 1) {
+        setInput(`open ${matches[0]}`);
+        setSuggestion("");
+      }
     }
+  }, [input]);
 
+  // Update ghost suggestion as user types
+  useEffect(() => {
+    const trimmed = input.trim().toLowerCase();
+    if (!trimmed) { setSuggestion(""); return; }
+
+    const parts = trimmed.split(/\s+/);
+
+    if (parts.length === 1) {
+      const match = COMMANDS.find((c) => c.startsWith(parts[0]) && c !== parts[0]);
+      setSuggestion(match ? match.slice(parts[0].length) : "");
+    } else if (parts[0] === "open" && parts.length === 2) {
+      const match = OPEN_TARGETS.find((t) => t.startsWith(parts[1]) && t !== parts[1]);
+      setSuggestion(match ? match.slice(parts[1].length) : "");
+    } else {
+      setSuggestion("");
+    }
+  }, [input]);
+
+  const pushLines = useCallback((...newLines: TerminalLine[]) => {
     setLines((prev) => [...prev, ...newLines]);
-    setInput("");
-  };
+  }, []);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!input.trim()) return;
+
+      const raw = input.trim();
+      const parts = raw.split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+      const arg = parts.slice(1).join(" ");
+
+      // Push input line
+      const inputLine: TerminalLine = { type: "input", text: `om@portfolio:~$ ${raw}` };
+
+      // Add to history
+      setHistory((prev) => [...prev.filter((h) => h !== raw), raw]);
+      setHistoryIdx(-1);
+      setInput("");
+      setSuggestion("");
+
+      const out: TerminalLine[] = [inputLine];
+
+      switch (cmd) {
+        case "help":
+          out.push({ type: "output", text: buildHelp() });
+          break;
+
+        case "whois":
+          out.push({ type: "output", text: buildWhois() });
+          break;
+
+        case "links":
+          out.push({ type: "output", text: buildLinks() });
+          break;
+
+        case "skills":
+          out.push({ type: "output", text: buildSkills() });
+          break;
+
+        case "projects":
+          out.push({ type: "output", text: buildProjects() });
+          break;
+
+        case "open": {
+          if (!arg) {
+            out.push({ type: "error", text: 'Usage: open <github|linkedin|email|project-slug>' });
+            break;
+          }
+          const target = arg.toLowerCase();
+          if (target === "github") {
+            out.push({ type: "system", text: `Opening ${resume.github}...` });
+            window.open(resume.github, "_blank");
+          } else if (target === "linkedin") {
+            out.push({ type: "system", text: `Opening ${resume.linkedin}...` });
+            window.open(resume.linkedin, "_blank");
+          } else if (target === "email") {
+            out.push({ type: "system", text: `Opening mailto:${resume.email}...` });
+            window.open(`mailto:${resume.email}`, "_blank");
+          } else if (projectSlugs.includes(target)) {
+            out.push({ type: "system", text: `Navigating to /work/${target}...` });
+            window.location.href = `/work/${target}`;
+          } else {
+            out.push({ type: "error", text: `Unknown target: "${arg}". Try: github, linkedin, email, or a project slug.` });
+          }
+          break;
+        }
+
+        case "contact":
+          out.push({
+            type: "output",
+            text: [
+              `Email:    ${resume.email}`,
+              `GitHub:   ${resume.github}`,
+              `LinkedIn: ${resume.linkedin}`,
+              "",
+              'Use "send <message>" to draft an email, or "open email" to open mail client.',
+            ].join("\n"),
+          });
+          break;
+
+        case "send": {
+          if (!arg) {
+            out.push({ type: "error", text: 'Usage: send <your message>' });
+            break;
+          }
+          out.push({ type: "system", text: "Opening email client with your message..." });
+          const subject = encodeURIComponent("Hey Om — from your portfolio");
+          const body = encodeURIComponent(arg);
+          window.open(`mailto:${resume.email}?subject=${subject}&body=${body}`, "_blank");
+          break;
+        }
+
+        case "clear":
+          setLines([{ type: "system", text: "om@portfolio:~$ Terminal cleared." }]);
+          return;
+
+        case "hello":
+        case "hi":
+        case "hey":
+          out.push({
+            type: "output",
+            text: `Hey! I'm Om. Thanks for stopping by. Use "contact" to see how to reach me, or "send <msg>" to fire off a quick email.`,
+          });
+          break;
+
+        default:
+          out.push({
+            type: "error",
+            text: `command not found: ${cmd}. Type "help" for available commands.`,
+          });
+      }
+
+      pushLines(...out);
+    },
+    [input, pushLines]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        handleTabComplete();
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (history.length === 0) return;
+        const newIdx = historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1);
+        setHistoryIdx(newIdx);
+        setInput(history[newIdx]);
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (historyIdx === -1) return;
+        const newIdx = historyIdx + 1;
+        if (newIdx >= history.length) {
+          setHistoryIdx(-1);
+          setInput("");
+        } else {
+          setHistoryIdx(newIdx);
+          setInput(history[newIdx]);
+        }
+      }
+    },
+    [handleTabComplete, history, historyIdx]
+  );
 
   return (
     <section id="contact" className="relative py-24 px-6">
@@ -144,12 +351,16 @@ export function Contact() {
             <span className="font-mono text-[10px] text-foreground/50 ml-2">
               om@portfolio — contact
             </span>
+            <span className="font-mono text-[10px] text-foreground/30 ml-auto">
+              {COMMANDS.length} commands available
+            </span>
           </div>
 
           {/* Terminal body */}
           <div
             ref={terminalRef}
-            className="p-4 h-64 overflow-y-auto font-mono text-sm leading-relaxed"
+            className="p-4 h-72 overflow-y-auto font-mono text-sm leading-relaxed"
+            onClick={() => inputRef.current?.focus()}
           >
             <AnimatePresence>
               {lines.map((line, i) => (
@@ -163,7 +374,9 @@ export function Contact() {
                       ? "text-accent-light"
                       : line.type === "system"
                         ? "text-accent-light/80"
-                        : "text-foreground/60"
+                        : line.type === "error"
+                          ? "text-red-400"
+                          : "text-foreground/60"
                   }`}
                 >
                   {line.text}
@@ -172,17 +385,44 @@ export function Contact() {
             </AnimatePresence>
 
             {/* Input line */}
-            <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2">
+            <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2 relative">
               <span className="text-accent-light/70 shrink-0">om@portfolio:~$</span>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-foreground caret-accent-light"
-                placeholder="Type a message or command..."
-              />
+              <div className="relative flex-1">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full bg-transparent outline-none text-foreground caret-accent-light relative z-10"
+                  placeholder="Type a command..."
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                {/* Ghost suggestion */}
+                {suggestion && (
+                  <span className="absolute left-0 top-0 pointer-events-none text-foreground/20 z-0">
+                    {input}{suggestion}
+                  </span>
+                )}
+              </div>
             </form>
           </div>
+        </motion.div>
+
+        {/* Hint strip */}
+        <motion.div
+          className="mt-3 flex gap-4 flex-wrap justify-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+        >
+          {["Tab: autocomplete", "↑↓: history", "help: commands"].map((hint) => (
+            <span key={hint} className="font-mono text-[10px] text-foreground/30">
+              {hint}
+            </span>
+          ))}
         </motion.div>
       </div>
     </section>

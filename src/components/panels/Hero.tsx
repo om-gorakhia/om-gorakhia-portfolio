@@ -29,6 +29,9 @@ export function Hero({ onAvatarClick, transmissionProgress }: HeroProps) {
         />
       </div>
 
+      {/* Dark vignette behind text for contrast */}
+      <div className="absolute inset-0 z-[5] pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_55%,rgba(5,6,10,0.75)_0%,transparent_100%)]" />
+
       {/* Hero overlay content */}
       <div className="relative z-10 flex flex-col items-center text-center pointer-events-none px-6">
         <motion.div
@@ -36,11 +39,11 @@ export function Hero({ onAvatarClick, transmissionProgress }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
         >
-          <MonoLabel className="mb-4 block">sys.operator.identify</MonoLabel>
+          <MonoLabel className="mb-4 block drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">sys.operator.identify</MonoLabel>
         </motion.div>
 
         <motion.h1
-          className="font-mono text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
+          className="font-mono text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
@@ -49,7 +52,7 @@ export function Hero({ onAvatarClick, transmissionProgress }: HeroProps) {
         </motion.h1>
 
         <motion.p
-          className="font-sans text-lg md:text-xl text-muted max-w-xl leading-relaxed"
+          className="font-sans text-lg md:text-xl text-muted max-w-xl leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9, ease: "easeOut" }}

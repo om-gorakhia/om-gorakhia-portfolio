@@ -131,6 +131,52 @@ export const projectDetails: Record<string, ProjectDetail> = {
       "Revenue optimization uses constrained nonlinear programming (scipy.optimize.minimize) with capacity bounds.",
     ],
   },
+  "banking-ai-advisor": {
+    slug: "banking-ai-advisor",
+    title: "Banking AI Advisor",
+    description:
+      "LLM-powered financial advisory agent. Multi-turn dialogue, risk profiling, and portfolio recommendations for retail banking.",
+    language: "Python",
+    url: "https://github.com/om-gorakhia",
+    domain: "Financial Services AI",
+    techniques: ["LLM Orchestration", "Risk Profiling", "Portfolio Theory", "Conversational AI"],
+    datasetScale: "Simulated retail banking clients",
+    role: "Solo Developer",
+    whatItDoes: [
+      "Retail banks spend millions on human financial advisors who repeat the same conversations — risk tolerance questionnaires, portfolio allocation explanations, product suitability checks. This project replaces the repetitive layer with an LLM-powered agent that conducts multi-turn advisory dialogues, profiles client risk, and generates portfolio recommendations grounded in modern portfolio theory.",
+      "The agent follows a structured advisory flow: opening assessment → risk profiling (scored across 5 dimensions) → goal decomposition → portfolio construction → suitability explanation. Each step uses constrained generation to ensure regulatory compliance — the agent cannot recommend products outside the client's assessed risk band.",
+      "The recommendation engine sits behind the conversational layer: a mean-variance optimizer constructs an efficient frontier from the bank's product shelf, then maps the client's risk score to a specific point on that frontier. The agent explains the recommendation in plain language, showing how each product contributes to the overall risk/return profile.",
+    ],
+    techStack: ["Python", "LangChain", "GPT-4", "NumPy", "Streamlit"],
+    architectureNotes: [
+      "Three-stage pipeline: conversational profiler (LLM) → risk scorer (rule-based + ML) → portfolio optimizer (mean-variance). Each stage is independently testable.",
+      "Risk profiling uses a 5-dimension framework: capacity, tolerance, horizon, liquidity needs, and knowledge. Each dimension scored 1-10, aggregated into a composite risk band (Conservative → Aggressive).",
+      "Suitability guardrails: product-risk mapping prevents the optimizer from including products above the client's risk ceiling. Every recommendation includes a regulatory-ready suitability justification.",
+    ],
+  },
+  "Ecommerce_Warehouse_Optimization": {
+    slug: "Ecommerce_Warehouse_Optimization",
+    title: "E-Commerce Warehouse Optimizer",
+    description:
+      "Supply chain optimization using linear programming to minimize warehouse costs and improve distribution efficiency.",
+    language: "Python",
+    url: "https://github.com/om-gorakhia/Ecommerce_Warehouse_Optimization",
+    domain: "Operations Research",
+    techniques: ["Linear Programming", "Network Flow", "Cost Minimization", "Scenario Analysis"],
+    datasetScale: "6 warehouses × 10 regions × 300+ products",
+    role: "Team Lead — 5-person team",
+    whatItDoes: [
+      "An e-commerce company with 6 warehouses, 10 delivery regions, and 300+ products was running at 45% order fulfillment — more than half of all orders resulted in stockouts. The root cause: inventory was allocated by gut feel, not math. This project formulates the allocation problem as a linear program and solves it to optimality.",
+      "The optimization model minimizes total system cost (transportation + holding + stockout penalties) subject to capacity, demand, and service-level constraints. The key insight was modeling inventory as continuous flow capacity rather than static stock — a 50,000-unit warehouse turning over 12× per year has 600,000 units of annual flow capacity, not 50,000.",
+      "The result: fulfillment jumped from 45% to 99%+, stockouts dropped below 5%, and annual profit improved by $44.9M. The system also identified a $3.7M transportation cost savings opportunity through carrier renegotiation. Nine scenario analyses (capacity expansion, cost changes, higher service targets) provide a decision playbook for the operations team.",
+    ],
+    techStack: ["Python", "PuLP", "pandas", "Plotly", "Streamlit", "NumPy"],
+    architectureNotes: [
+      "Multi-commodity network flow LP: decision variables x[i,j,p] for shipments from warehouse i to region j for product p, with stockout slack variables.",
+      "Objective: minimize Σ transport_cost × shipments + Σ holding_cost × inventory + Σ penalty × stockouts. Solved with CBC (branch-and-cut) in ~2 seconds.",
+      "Scenario engine runs 9 variants (capacity ±10-30%, transport cost ±10-20%, service target 95-99%) and compares KPIs in a unified dashboard.",
+    ],
+  },
 };
 
 export const projectSlugs = Object.keys(projectDetails);

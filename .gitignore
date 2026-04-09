@@ -24,3 +24,4 @@ selfie_*.png
 next-env.d.ts
 
 .vercel
+screenshot_*.png

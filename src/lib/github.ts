@@ -8,6 +8,8 @@ const SELECTED_REPO_NAMES = [
   "synpulse",
   "loan-default-prediction",
   "econometric-modeling-demand-analysis",
+  "banking-ai-advisor",
+  "Ecommerce_Warehouse_Optimization",
 ];
 
 const octokit = new Octokit();

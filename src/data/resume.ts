@@ -43,24 +43,9 @@ export const resume: ResumeData = {
 
 export const timeline: TimelineEntry[] = [
   {
-    date: "2019",
-    title: "Started B.Tech in ICT",
-    description: "Pandit Deendayal Energy University, Ahmedabad",
-  },
-  {
-    date: "2023",
-    title: "Joined InfoAnalytica",
-    description: "Data modeling & automation for B2B marketing consulting",
-  },
-  {
-    date: "2024",
-    title: "Built LLM-powered lead platform",
-    description: "40% conversion lift — served Amazon, Walmart, PayPal",
-  },
-  {
-    date: "2024",
-    title: "Led data engineering team",
-    description: "Managed 4 interns, shipped proprietary analytics platform",
+    date: "2026",
+    title: "Building autonomous AI systems",
+    description: "Algo trading, agentic AI for healthcare, quantitative modeling",
   },
   {
     date: "2025",
@@ -68,8 +53,23 @@ export const timeline: TimelineEntry[] = [
     description: "NUS Business School — Business Analytics",
   },
   {
-    date: "2026",
-    title: "Building autonomous AI systems",
-    description: "Algo trading, agentic AI for healthcare, quantitative modeling",
+    date: "2024",
+    title: "Led data engineering team",
+    description: "Managed 4 interns, shipped proprietary analytics platform",
+  },
+  {
+    date: "2024",
+    title: "Built LLM-powered lead platform",
+    description: "40% conversion lift — served Amazon, Walmart, PayPal",
+  },
+  {
+    date: "2023",
+    title: "Joined InfoAnalytica",
+    description: "Data modeling & automation for B2B marketing consulting",
+  },
+  {
+    date: "2019",
+    title: "Started B.Tech in ICT",
+    description: "Pandit Deendayal Energy University, Ahmedabad",
   },
 ];

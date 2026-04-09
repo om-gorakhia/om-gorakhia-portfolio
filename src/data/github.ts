@@ -51,6 +51,26 @@ export const selectedRepos: Repo[] = [
     url: "https://github.com/om-gorakhia/econometric-modeling-demand-analysis",
     topics: [],
   },
+  {
+    name: "banking-ai-advisor",
+    description: "LLM-powered financial advisory agent. Multi-turn dialogue, risk profiling, and portfolio recommendations for retail banking.",
+    language: "Python",
+    stars: 0,
+    forks: 0,
+    pushedAt: "2026-02-14T10:30:00Z",
+    url: "https://github.com/om-gorakhia",
+    topics: ["llm", "financial-advisory", "risk-profiling"],
+  },
+  {
+    name: "Ecommerce_Warehouse_Optimization",
+    description: "Supply chain optimization using linear programming to minimize warehouse costs and improve distribution efficiency.",
+    language: "Python",
+    stars: 0,
+    forks: 0,
+    pushedAt: "2026-01-18T03:15:58Z",
+    url: "https://github.com/om-gorakhia/Ecommerce_Warehouse_Optimization",
+    topics: ["linear-programming", "supply-chain", "optimization"],
+  },
 ];
 
 export const githubData: GitHubData = {

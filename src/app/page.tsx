@@ -11,7 +11,10 @@ export default async function Home() {
     fetchMostRecentCommit(),
   ]);
 
-  const repos = liveRepos.length > 0 ? liveRepos : selectedRepos;
+  // Merge live data with static entries for repos not found on GitHub
+  const liveNames = new Set(liveRepos.map((r) => r.name));
+  const staticOnly = selectedRepos.filter((r) => !liveNames.has(r.name));
+  const repos = liveRepos.length > 0 ? [...liveRepos, ...staticOnly] : selectedRepos;
   const commit = liveCommit ?? githubData.mostRecentCommit;
 
   return <PageClient repos={repos} commit={commit} />;
