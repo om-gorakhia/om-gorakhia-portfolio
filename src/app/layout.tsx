@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "om.sys — Operator Console",
   description:
     "Om Gorakhia — I turn messy data into systems that decide. Algo trading, agentic AI, quantitative modeling. NUS MSBA.",
-  metadataBase: new URL("https://portfolio-build-kohl.vercel.app"),
+  metadataBase: new URL("https://om-sys.vercel.app"),
   openGraph: {
     title: "om.sys — Operator Console",
     description:
