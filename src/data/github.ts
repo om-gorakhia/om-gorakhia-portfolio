@@ -1,0 +1,67 @@
+import type { GitHubData, Repo } from "@/lib/types";
+
+export const selectedRepos: Repo[] = [
+  {
+    name: "nse-algo-trading-system",
+    description: "Automated stock trading system for Indian NSE markets. Screens 2400+ stocks daily across 10 strategies with multi-checkpoint validation.",
+    language: "Python",
+    stars: 1,
+    forks: 0,
+    pushedAt: "2026-04-08T02:46:30Z",
+    url: "https://github.com/om-gorakhia/nse-algo-trading-system",
+    topics: [],
+  },
+  {
+    name: "sports-bet-portfolio",
+    description: "IPL in-play betting hedge calculator. Mean-variance optimisation, Kelly Criterion, and Gemini AI for real-time cricket betting.",
+    language: "Python",
+    stars: 0,
+    forks: 0,
+    pushedAt: "2026-04-08T17:15:44Z",
+    url: "https://github.com/om-gorakhia/sports-bet-portfolio",
+    topics: ["betting", "kelly-criterion", "gemini-ai", "streamlit"],
+  },
+  {
+    name: "synpulse",
+    description: "Agentic AI for Chronic Disease Management — NUS-Synapxe-IMDA AI Innovation Challenge 2026.",
+    language: "Python",
+    stars: 0,
+    forks: 0,
+    pushedAt: "2026-03-19T01:09:03Z",
+    url: "https://github.com/om-gorakhia/synpulse",
+    topics: [],
+  },
+  {
+    name: "loan-default-prediction",
+    description: "ML model for loan default prediction with contextual loss evaluation and interactive Streamlit dashboard.",
+    language: "Python",
+    stars: 0,
+    forks: 0,
+    pushedAt: "2026-01-18T02:24:07Z",
+    url: "https://github.com/om-gorakhia/loan-default-prediction",
+    topics: [],
+  },
+  {
+    name: "econometric-modeling-demand-analysis",
+    description: "Demand function estimation for train travel. Market segmentation and dynamic pricing via econometric modeling.",
+    language: "Python",
+    stars: 0,
+    forks: 0,
+    pushedAt: "2026-01-18T03:25:08Z",
+    url: "https://github.com/om-gorakhia/econometric-modeling-demand-analysis",
+    topics: [],
+  },
+];
+
+export const githubData: GitHubData = {
+  username: "om-gorakhia",
+  avatarUrl: "https://avatars.githubusercontent.com/u/231525646?v=4",
+  bio: "Business Analyst | Data Scientist | ML Engineer",
+  repos: selectedRepos,
+  mostRecentCommit: {
+    repo: "sports-bet-portfolio",
+    message: "Update dashboard",
+    date: "2026-04-08T17:15:41Z",
+    language: "Python",
+  },
+};
