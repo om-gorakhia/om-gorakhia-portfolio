@@ -47,7 +47,7 @@ const simulations: Record<string, React.ComponentType> = {
   synpulse: AgentTheater,
   "loan-default-prediction": RiskScorer,
   "econometric-modeling-demand-analysis": PricingLab,
-  "banking-ai-advisor": AdvisorConsole,
+  "Banking-AI-advisor": AdvisorConsole,
   "Ecommerce_Warehouse_Optimization": WarehouseOptimizer,
 };
 

@@ -3,161 +3,182 @@
 import { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  PieChart,
-  Pie,
   Cell,
 } from "recharts";
 import { chartColors, ChartTooltip, StatTile } from "../ChartTheme";
 
-/* ── Risk Profile Dimensions ─────────────────────────────── */
-interface RiskProfile {
-  capacity: number;    // 1-10 financial capacity
-  tolerance: number;   // 1-10 emotional tolerance
-  horizon: number;     // years
-  liquidity: number;   // 1-10 need for liquidity
-  knowledge: number;   // 1-10 investment knowledge
-}
-
-const defaultProfile: RiskProfile = {
-  capacity: 6,
-  tolerance: 5,
-  horizon: 10,
-  liquidity: 4,
-  knowledge: 5,
+/* ── Real FHI Engine Weights (from fhi_engine_data.json) ── */
+const LR_ENHANCED = {
+  net_worth_score: 0.115357,
+  dti_score: 0.010889,
+  savings_score: 0.126242,
+  investment_score: 0.58911,
+  emergency_score: 0.01508,
+  spending_ratio_score: 0.060669,
+  spending_volatility_score: 0.050576,
+  panic_sell_score: 0.032078,
 };
 
-const presets: { label: string; profile: RiskProfile }[] = [
-  { label: "Fresh Graduate", profile: { capacity: 3, tolerance: 7, horizon: 30, liquidity: 6, knowledge: 3 } },
-  { label: "Mid-Career Pro", profile: { capacity: 7, tolerance: 5, horizon: 15, liquidity: 4, knowledge: 6 } },
-  { label: "Pre-Retiree", profile: { capacity: 8, tolerance: 3, horizon: 5, liquidity: 7, knowledge: 7 } },
-  { label: "Aggressive Trader", profile: { capacity: 6, tolerance: 9, horizon: 8, liquidity: 3, knowledge: 9 } },
+const CLUSTER_PROFILES = [
+  { label: "Financially Vulnerable", color: "#EF4444", desc: "High debt, low savings and minimal emergency buffer. Immediate action needed.", avgFhi: 7.07 },
+  { label: "Developing", color: "#F59E0B", desc: "Building financial foundations. Some savings but limited investment coverage.", avgFhi: 10.25 },
+  { label: "Stable", color: "#3B82F6", desc: "Solid savings rate and manageable debt. Ready to grow investments.", avgFhi: 10.28 },
+  { label: "Thriving", color: "#22C55E", desc: "Strong across all pillars — diversified investments, low debt.", avgFhi: 11.44 },
 ];
 
-/* ── Asset Classes ────────────────────────────────────────── */
-interface AssetClass {
-  name: string;
-  expectedReturn: number;
-  volatility: number;
-  color: string;
-  riskFloor: number; // min risk score to include
-}
-
-const assets: AssetClass[] = [
-  { name: "Govt Bonds", expectedReturn: 0.04, volatility: 0.03, color: "#22C55E", riskFloor: 0 },
-  { name: "Corp Bonds", expectedReturn: 0.06, volatility: 0.06, color: "#3B82F6", riskFloor: 0 },
-  { name: "Large Cap Equity", expectedReturn: 0.10, volatility: 0.15, color: chartColors.accentLight, riskFloor: 3 },
-  { name: "Mid Cap Equity", expectedReturn: 0.13, volatility: 0.22, color: "#F59E0B", riskFloor: 5 },
-  { name: "Small Cap Equity", expectedReturn: 0.16, volatility: 0.30, color: "#EF4444", riskFloor: 7 },
-  { name: "Alternatives", expectedReturn: 0.12, volatility: 0.18, color: "#EC4899", riskFloor: 6 },
+// Scaled centroids from the real K-Means model
+const CENTROIDS_SCALED = [
+  [-0.4472, -0.0756, -0.6095, -0.2316, -0.4505, -0.6095, 0.0704, -0.3819],
+  [-0.3326, 0.0524, 1.2334, -0.2050, -0.1908, 1.2334, 0.0438, -0.3251],
+  [1.4419, 0.1437, -0.1255, 0.0200, 1.3141, -0.1255, -0.3142, -0.3708],
+  [-0.1832, -0.0779, -0.0764, 1.1921, -0.2378, -0.0764, 0.1922, 2.6185],
 ];
 
-/* ── Scoring & Allocation Engine ─────────────────────────── */
-function computeRiskScore(p: RiskProfile): number {
-  // Weighted composite: capacity 25%, tolerance 25%, horizon 20%, liquidity (inverse) 15%, knowledge 15%
-  const horizonScore = Math.min(p.horizon / 3, 10); // 30yr = 10
-  const liquidityInv = 11 - p.liquidity; // invert: high liquidity need = low risk
-  const raw = p.capacity * 0.25 + p.tolerance * 0.25 + horizonScore * 0.2 + liquidityInv * 0.15 + p.knowledge * 0.15;
-  return Math.round(Math.max(1, Math.min(10, raw)) * 10) / 10;
+const SCALER_MEAN = [12.00, 97.05, 12.62, 0.81, 23.44, 12.62, 50.12, 6.36];
+const SCALER_STD = [13.71, 4.36, 7.15, 1.35, 19.23, 7.15, 24.72, 16.66];
+
+/* ── User Input Interface ─────────────────────────────────── */
+interface UserInputs {
+  income: number;       // monthly SGD
+  expenses: number;     // monthly SGD
+  debt: number;         // total outstanding
+  savings: number;      // total savings
+  investments: number;  // total invested
+  emergencyFund: number; // months of expenses covered
+  age: number;
 }
 
-function getRiskBand(score: number): string {
-  if (score <= 3) return "Conservative";
-  if (score <= 5) return "Moderate";
-  if (score <= 7) return "Growth";
-  return "Aggressive";
+const defaultInputs: UserInputs = {
+  income: 4000,
+  expenses: 2800,
+  debt: 5000,
+  savings: 8000,
+  investments: 2000,
+  emergencyFund: 2,
+  age: 24,
+};
+
+const presets: { label: string; inputs: UserInputs }[] = [
+  { label: "Uni Student", inputs: { income: 1200, expenses: 1000, debt: 12000, savings: 800, investments: 0, emergencyFund: 0.5, age: 21 } },
+  { label: "Fresh Grad", inputs: { income: 4500, expenses: 3200, debt: 8000, savings: 3000, investments: 500, emergencyFund: 1, age: 23 } },
+  { label: "Saver", inputs: { income: 5500, expenses: 2500, debt: 2000, savings: 25000, investments: 5000, emergencyFund: 6, age: 26 } },
+  { label: "Investor", inputs: { income: 6000, expenses: 3500, debt: 1000, savings: 15000, investments: 40000, emergencyFund: 4, age: 28 } },
+];
+
+/* ── FHI Computation ──────────────────────────────────────── */
+function computeFeatureScores(u: UserInputs) {
+  const netWorth = u.savings + u.investments - u.debt;
+  const netWorthScore = Math.max(0, Math.min(50, (netWorth / Math.max(u.income * 12, 1)) * 100));
+  const dtiScore = Math.max(0, Math.min(100, 100 - (u.debt / Math.max(u.income * 12, 1)) * 100));
+  const savingsRate = ((u.income - u.expenses) / Math.max(u.income, 1)) * 100;
+  const savingsScore = Math.max(0, Math.min(40, savingsRate));
+  const investmentScore = Math.max(0, Math.min(5, (u.investments / Math.max(netWorth > 0 ? netWorth : u.income * 12, 1)) * 5));
+  const emergencyScore = Math.max(0, Math.min(60, u.emergencyFund * 10));
+  const spendingRatio = (u.expenses / Math.max(u.income, 1)) * 100;
+  const spendingRatioScore = Math.max(0, Math.min(40, 40 - (spendingRatio - 50)));
+  const spendingVolScore = 50; // fixed in simulation (no time-series)
+  const panicSellScore = investmentScore > 1 ? 10 : 0;
+
+  return {
+    net_worth_score: netWorthScore,
+    dti_score: dtiScore,
+    savings_score: savingsScore,
+    investment_score: investmentScore,
+    emergency_score: emergencyScore,
+    spending_ratio_score: spendingRatioScore,
+    spending_volatility_score: spendingVolScore,
+    panic_sell_score: panicSellScore,
+  };
 }
 
-function computeAllocation(score: number): { name: string; weight: number; color: string }[] {
-  const eligible = assets.filter((a) => score >= a.riskFloor);
-  // Higher risk score → tilt toward higher-return assets
-  const rawWeights = eligible.map((a) => {
-    const riskAffinity = score / 10;
-    return Math.pow(a.expectedReturn, riskAffinity) * (1 / a.volatility);
-  });
-  const total = rawWeights.reduce((s, w) => s + w, 0);
-  return eligible.map((a, i) => ({
-    name: a.name,
-    weight: Math.round((rawWeights[i] / total) * 100),
-    color: a.color,
-  }));
-}
-
-function portfolioStats(allocation: { name: string; weight: number }[]) {
-  let expReturn = 0;
-  let expVol = 0;
-  for (const a of allocation) {
-    const asset = assets.find((x) => x.name === a.name)!;
-    const w = a.weight / 100;
-    expReturn += w * asset.expectedReturn;
-    expVol += w * w * asset.volatility * asset.volatility;
+function computeFHI(scores: Record<string, number>): number {
+  let fhi = 0;
+  for (const [key, weight] of Object.entries(LR_ENHANCED)) {
+    fhi += (scores[key] ?? 0) * weight;
   }
-  expVol = Math.sqrt(expVol);
-  return { expReturn, expVol, sharpe: (expReturn - 0.03) / expVol };
+  return Math.max(0, Math.min(50, fhi));
 }
 
-/* ── Growth Projection ───────────────────────────────────── */
-function projectGrowth(
-  initialInvestment: number,
-  annualReturn: number,
-  volatility: number,
-  years: number
-): { year: number; expected: number; optimistic: number; pessimistic: number }[] {
-  const data = [];
-  for (let y = 0; y <= years; y++) {
-    const expected = initialInvestment * Math.pow(1 + annualReturn, y);
-    const optimistic = initialInvestment * Math.pow(1 + annualReturn + volatility * 0.8, y);
-    const pessimistic = initialInvestment * Math.pow(1 + Math.max(annualReturn - volatility * 0.8, -0.05), y);
-    data.push({
-      year: y,
-      expected: Math.round(expected),
-      optimistic: Math.round(optimistic),
-      pessimistic: Math.round(pessimistic),
-    });
+function assignCluster(scores: Record<string, number>): number {
+  const keys = Object.keys(LR_ENHANCED);
+  const scaled = keys.map((k, i) => ((scores[k] ?? 0) - SCALER_MEAN[i]) / SCALER_STD[i]);
+
+  let bestCluster = 0;
+  let bestDist = Infinity;
+  for (let c = 0; c < CENTROIDS_SCALED.length; c++) {
+    let dist = 0;
+    for (let i = 0; i < scaled.length; i++) {
+      dist += Math.pow(scaled[i] - CENTROIDS_SCALED[c][i], 2);
+    }
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestCluster = c;
+    }
   }
-  return data;
+  return bestCluster;
+}
+
+function getFhiLabel(score: number): { label: string; color: string } {
+  if (score >= 25) return { label: "Financially Strong", color: "#22C55E" };
+  if (score >= 12) return { label: "On the Right Track", color: "#F59E0B" };
+  return { label: "Building Foundations", color: "#EF4444" };
 }
 
 /* ── Component ───────────────────────────────────────────── */
 export function AdvisorConsole() {
-  const [profile, setProfile] = useState<RiskProfile>(defaultProfile);
-  const [investment] = useState(100000);
+  const [inputs, setInputs] = useState<UserInputs>(defaultInputs);
 
-  const riskScore = useMemo(() => computeRiskScore(profile), [profile]);
-  const band = getRiskBand(riskScore);
-  const allocation = useMemo(() => computeAllocation(riskScore), [riskScore]);
-  const stats = useMemo(() => portfolioStats(allocation), [allocation]);
-  const projection = useMemo(
-    () => projectGrowth(investment, stats.expReturn, stats.expVol, Math.min(profile.horizon, 30)),
-    [investment, stats.expReturn, stats.expVol, profile.horizon]
-  );
+  const scores = useMemo(() => computeFeatureScores(inputs), [inputs]);
+  const fhi = useMemo(() => computeFHI(scores), [scores]);
+  const cluster = useMemo(() => assignCluster(scores), [scores]);
+  const fhiStatus = getFhiLabel(fhi);
+  const personality = CLUSTER_PROFILES[cluster];
 
-  const updateDim = (key: keyof RiskProfile, val: number) =>
-    setProfile((p) => ({ ...p, [key]: val }));
+  const update = (key: keyof UserInputs, val: number) =>
+    setInputs((p) => ({ ...p, [key]: val }));
 
-  const bandColor =
-    band === "Conservative" ? "#22C55E" :
-    band === "Moderate" ? "#3B82F6" :
-    band === "Growth" ? "#F59E0B" :
-    "#EF4444";
+  // Radar chart data
+  const radarData = [
+    { metric: "Net Worth", value: Math.min(scores.net_worth_score, 50), max: 50 },
+    { metric: "Debt-to-Income", value: Math.min(scores.dti_score, 100), max: 100 },
+    { metric: "Savings Rate", value: Math.min(scores.savings_score, 40), max: 40 },
+    { metric: "Investment", value: Math.min(scores.investment_score * 20, 100), max: 100 },
+    { metric: "Emergency Fund", value: Math.min(scores.emergency_score, 60), max: 60 },
+    { metric: "Spending Control", value: Math.min(scores.spending_ratio_score, 40), max: 40 },
+  ].map((d) => ({ ...d, pct: Math.round((d.value / d.max) * 100) }));
+
+  // Weight breakdown bar chart
+  const weightData = Object.entries(LR_ENHANCED)
+    .map(([key, weight]) => ({
+      name: key.replace(/_score$/, "").replace(/_/g, " "),
+      weight: Math.round(weight * 100),
+      contribution: Math.round(((scores as Record<string, number>)[key] ?? 0) * weight * 10) / 10,
+    }))
+    .sort((a, b) => b.weight - a.weight);
 
   return (
     <div className="space-y-6">
-      {/* Preset clients */}
+      {/* Preset profiles */}
       <div>
         <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/40 mb-2">
-          load client profile
+          load user profile
         </div>
         <div className="flex gap-2 flex-wrap">
           {presets.map((p) => (
             <button
               key={p.label}
-              onClick={() => setProfile(p.profile)}
+              onClick={() => setInputs(p.inputs)}
               className="font-mono text-xs px-3 py-1.5 rounded-lg border border-surface-border bg-surface/80 text-foreground/60 hover:border-accent/30 hover:text-accent-light transition-colors"
             >
               {p.label}
@@ -166,167 +187,155 @@ export function AdvisorConsole() {
         </div>
       </div>
 
-      {/* Risk dimension sliders */}
+      {/* Input sliders */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {([
-          ["capacity", "Financial Capacity", 1, 10, ""],
-          ["tolerance", "Risk Tolerance", 1, 10, ""],
-          ["horizon", "Investment Horizon", 1, 30, "yr"],
-          ["liquidity", "Liquidity Need", 1, 10, ""],
-          ["knowledge", "Investment Knowledge", 1, 10, ""],
+          ["income", "Monthly Income (SGD)", 500, 15000, ""],
+          ["expenses", "Monthly Expenses (SGD)", 200, 12000, ""],
+          ["debt", "Total Debt (SGD)", 0, 100000, ""],
+          ["savings", "Total Savings (SGD)", 0, 100000, ""],
+          ["investments", "Total Invested (SGD)", 0, 100000, ""],
+          ["emergencyFund", "Emergency Fund (months)", 0, 12, "mo"],
+          ["age", "Age", 18, 30, ""],
         ] as const).map(([key, label, min, max, unit]) => (
           <div key={key} className="space-y-1">
             <div className="flex justify-between">
               <span className="font-mono text-xs text-foreground/50">{label}</span>
               <span className="font-mono text-xs text-accent-light">
-                {profile[key]}{unit}
+                {key === "emergencyFund" ? inputs[key].toFixed(1) : inputs[key].toLocaleString()}{unit}
               </span>
             </div>
             <input
               type="range"
               min={min}
               max={max}
-              step={key === "horizon" ? 1 : 1}
-              value={profile[key]}
-              onChange={(e) => updateDim(key, Number(e.target.value))}
+              step={key === "emergencyFund" ? 0.5 : key === "age" ? 1 : 100}
+              value={inputs[key]}
+              onChange={(e) => update(key, Number(e.target.value))}
               className="w-full accent-[#A855F7] h-1"
             />
           </div>
         ))}
       </div>
 
-      {/* Risk Score + Band */}
-      <div className="flex gap-4 flex-wrap">
-        <StatTile label="Composite Risk Score" value={riskScore.toFixed(1)} accent />
+      {/* FHI Score + Personality */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-xl border border-surface-border bg-surface/80 px-4 py-3">
           <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/30 mb-1">
-            Risk Band
+            FHI Score
           </div>
-          <div className="font-mono text-lg font-semibold" style={{ color: bandColor }}>
-            {band}
+          <div className="font-mono text-2xl font-bold" style={{ color: fhiStatus.color }}>
+            {fhi.toFixed(1)}
+          </div>
+          <div className="font-mono text-[10px]" style={{ color: fhiStatus.color }}>
+            {fhiStatus.label}
           </div>
         </div>
-        <StatTile label="Expected Return" value={`${(stats.expReturn * 100).toFixed(1)}%`} />
-        <StatTile label="Sharpe Ratio" value={stats.sharpe.toFixed(2)} accent />
+        <div className="rounded-xl border border-surface-border bg-surface/80 px-4 py-3">
+          <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/30 mb-1">
+            Money Personality
+          </div>
+          <div className="font-mono text-sm font-semibold" style={{ color: personality.color }}>
+            {personality.label}
+          </div>
+          <div className="font-mono text-[10px] text-foreground/40 mt-0.5">
+            avg FHI: {personality.avgFhi}
+          </div>
+        </div>
+        <StatTile
+          label="Savings Rate"
+          value={`${Math.round(((inputs.income - inputs.expenses) / Math.max(inputs.income, 1)) * 100)}%`}
+        />
+        <StatTile
+          label="Investment Ratio"
+          value={`${Math.round((inputs.investments / Math.max(inputs.savings + inputs.investments, 1)) * 100)}%`}
+          accent
+        />
       </div>
 
-      {/* Allocation Pie + Legend */}
+      {/* Radar Chart */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/40 mb-3">
-            Recommended Allocation
+            Financial Health Radar
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={allocation}
-                dataKey="weight"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={90}
-                paddingAngle={2}
-                stroke="none"
-              >
-                {allocation.map((a) => (
-                  <Cell key={a.name} fill={a.color} />
-                ))}
-              </Pie>
+          <ResponsiveContainer width="100%" height={260}>
+            <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+              <PolarGrid stroke={chartColors.grid} />
+              <PolarAngleAxis
+                dataKey="metric"
+                tick={{ fontSize: 9, fill: chartColors.axisText }}
+              />
+              <PolarRadiusAxis
+                angle={30}
+                domain={[0, 100]}
+                tick={{ fontSize: 8, fill: chartColors.axisText }}
+              />
+              <Radar
+                dataKey="pct"
+                stroke={chartColors.accentLight}
+                fill={chartColors.accent}
+                fillOpacity={0.3}
+                strokeWidth={2}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Weight Breakdown */}
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/40 mb-3">
+            FHI Weight Breakdown (L1 Coefficients)
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={weightData} layout="vertical" barCategoryGap="15%">
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+              <XAxis
+                type="number"
+                domain={[0, 60]}
+                tick={{ fontSize: 10, fill: chartColors.axisText }}
+                tickFormatter={(v) => `${v}%`}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={{ fontSize: 9, fill: chartColors.axisText }}
+                width={100}
+              />
               <Tooltip
-                content={({ active, payload }) => (
+                content={({ active, payload, label }) => (
                   <ChartTooltip
                     active={active}
                     payload={payload as never}
-                    formatter={(v) => `${v}%`}
+                    label={String(label ?? "")}
+                    formatter={(v, n) => n === "weight" ? `${v}%` : v.toFixed(1)}
                   />
                 )}
               />
-            </PieChart>
+              <Bar dataKey="weight" name="Weight %" radius={[0, 4, 4, 0]}>
+                {weightData.map((d, i) => (
+                  <Cell key={i} fill={i === 0 ? chartColors.accentLight : chartColors.accent} />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-col justify-center space-y-2">
-          {allocation.map((a) => (
-            <div key={a.name} className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-sm shrink-0" style={{ background: a.color }} />
-              <span className="font-mono text-xs text-foreground/60 flex-1">{a.name}</span>
-              <span className="font-mono text-xs text-foreground">{a.weight}%</span>
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Growth Projection Chart */}
-      <div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/40 mb-3">
-          Portfolio Growth Projection — ₹{(investment / 1000).toFixed(0)}K initial
-        </div>
-        <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={projection}>
-            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-            <XAxis
-              dataKey="year"
-              tick={{ fontSize: 10, fill: chartColors.axisText }}
-              tickFormatter={(v) => `Y${v}`}
-            />
-            <YAxis
-              tick={{ fontSize: 10, fill: chartColors.axisText }}
-              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`}
-            />
-            <Tooltip
-              content={({ active, payload, label }) => (
-                <ChartTooltip
-                  active={active}
-                  payload={payload as never}
-                  label={`Year ${label}`}
-                  formatter={(v) => `₹${(v / 1000).toFixed(0)}K`}
-                />
-              )}
-            />
-            <Area
-              type="monotone"
-              dataKey="optimistic"
-              stroke="none"
-              fill={chartColors.green}
-              fillOpacity={0.1}
-              name="Optimistic"
-            />
-            <Area
-              type="monotone"
-              dataKey="expected"
-              stroke={chartColors.accentLight}
-              fill={chartColors.accent}
-              fillOpacity={0.2}
-              strokeWidth={2}
-              name="Expected"
-            />
-            <Area
-              type="monotone"
-              dataKey="pessimistic"
-              stroke="none"
-              fill={chartColors.red}
-              fillOpacity={0.1}
-              name="Pessimistic"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Suitability Verdict */}
+      {/* Personality description */}
       <div className="rounded-xl border border-surface-border bg-surface/80 p-4">
         <div className="font-mono text-[10px] uppercase tracking-widest text-foreground/40 mb-2">
-          suitability.assessment()
+          fhi.assess()
         </div>
         <p className="font-mono text-sm text-foreground/70 leading-relaxed">
-          Client profile maps to <span style={{ color: bandColor }} className="font-semibold">{band}</span> risk band
-          (score {riskScore.toFixed(1)}/10). Recommended portfolio targets{" "}
-          <span className="text-accent-light">{(stats.expReturn * 100).toFixed(1)}%</span> annual return
-          with <span className="text-foreground">{(stats.expVol * 100).toFixed(1)}%</span> expected volatility.
-          {band === "Conservative" && " Allocation emphasizes fixed-income instruments to preserve capital."}
-          {band === "Moderate" && " Balanced allocation across fixed-income and equity for steady growth."}
-          {band === "Growth" && " Equity-heavy allocation for long-horizon wealth accumulation."}
-          {band === "Aggressive" && " High-conviction equity and alternatives allocation — suitable only with demonstrated risk capacity."}
-          {" "}All recommended products fall within the client&apos;s assessed risk ceiling.
+          FHI Score <span style={{ color: fhiStatus.color }} className="font-semibold">{fhi.toFixed(1)}</span> — {fhiStatus.label}.
+          {" "}Cluster assignment: <span style={{ color: personality.color }} className="font-semibold">{personality.label}</span>.
+          {" "}{personality.desc}
+          {" "}Investment behavior accounts for <span className="text-accent-light">59%</span> of the total FHI weight —
+          the strongest predictor of long-term financial resilience for ages 18-30.
+          {scores.investment_score < 1 && " Consider starting with a small, regular investment to significantly boost your FHI."}
+          {scores.emergency_score < 20 && " Building an emergency fund covering 3+ months of expenses would strengthen your financial safety net."}
+          {scores.savings_score > 20 && scores.investment_score < 1 && " Your savings rate is solid — redirecting some into investments would substantially improve your score."}
         </p>
       </div>
     </div>
