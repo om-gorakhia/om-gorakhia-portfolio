@@ -180,7 +180,6 @@ export function Contact() {
                 onChange={(e) => setInput(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-foreground caret-accent-light"
                 placeholder="Type a message or command..."
-                autoFocus
               />
             </form>
           </div>
